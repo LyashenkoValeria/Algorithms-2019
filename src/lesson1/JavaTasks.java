@@ -2,6 +2,9 @@ package lesson1;
 
 import kotlin.NotImplementedError;
 
+import java.io.*;
+import java.util.*;
+
 @SuppressWarnings("unused")
 public class JavaTasks {
     /**
@@ -34,8 +37,49 @@ public class JavaTasks {
      *
      * В случае обнаружения неверного формата файла бросить любое исключение.
      */
-    static public void sortTimes(String inputName, String outputName) {
-        throw new NotImplementedError();
+    //T(N)=O(N*log N)-трудоёмкость
+    //R(N)=O(N)-ресурсоёмкость
+    static public void sortTimes(String inputName, String outputName) throws IOException {
+        try {
+            FileInputStream input = new FileInputStream(inputName);
+            List<String> lines = new ArrayList<>();
+            Scanner reader = new Scanner(new InputStreamReader(input));
+            while ((reader.hasNextLine())) {
+                String line = reader.nextLine().trim();
+                if (line.matches("[01][0-9]:[0-5][0-9]:[0-5][0-9]\\s[AP]M")) {
+                    if (line.substring(0,2).matches("[1][2]")){
+                        line = "00" + line.substring(2);
+                    }
+                    if (line.contains("AM"))
+                    {   line = "AM"+line.substring(0,8);
+                        lines.add(line);
+                    }
+                    else {
+                        line = "PM"+line.substring(0,8);
+                        lines.add(line);
+                    }
+                }
+                else {
+                    throw new IOException();
+                }
+            }
+            reader.close();
+            Collections.sort(lines);
+            for(int i=0; i < lines.size(); i++){
+                String line = lines.get(i);
+                lines.set(i, line.substring(2)+" "+line.substring(0,2));
+                if (lines.get(i).substring(0,2).matches("00")){
+                    lines.set(i, "12"+lines.get(i).substring(2));
+                }
+            }
+            BufferedWriter writer = new BufferedWriter(new FileWriter(outputName));
+            for (String line : lines) {
+                writer.write(line + "\n");
+            }
+            writer.close();
+        } catch (FileNotFoundException e){
+            throw new IOException();
+        }
     }
 
     /**
@@ -64,7 +108,7 @@ public class JavaTasks {
      *
      * В случае обнаружения неверного формата файла бросить любое исключение.
      */
-    static public void sortAddresses(String inputName, String outputName) {
+    static public void sortAddresses(String inputName, String outputName)  {
         throw new NotImplementedError();
     }
 
@@ -98,8 +142,35 @@ public class JavaTasks {
      * 99.5
      * 121.3
      */
-    static public void sortTemperatures(String inputName, String outputName) {
-        throw new NotImplementedError();
+    //T(N)=O(N)-трудоёмкость
+    //R(N)=O(1)-ресурсоёмкость
+    static public void sortTemperatures(String inputName, String outputName) throws IOException {
+        FileInputStream input = new FileInputStream(inputName);
+        int [] temp = new int[7731];
+        Scanner reader = new Scanner(new InputStreamReader(input));
+        while ((reader.hasNextLine())) {
+            String line = reader.nextLine().trim();
+            if (!line.matches("[-][0-9]*[.][0-9]|[0-9]*[.][0-9]")){
+                throw new IOException();
+            }
+            if (-2730>Integer.parseInt(line.replaceAll("[.]", "")) &&
+                    5000<Integer.parseInt(line.replaceAll("[.]", ""))){
+                throw new IOException();
+            }
+            line = line.replaceAll("[.]", "");
+            temp[Integer.parseInt(line)+2730]++;
+        }
+        reader.close();
+        BufferedWriter writer = new BufferedWriter(new FileWriter(outputName));
+        for (int i=0; i<7731; i++){
+            String s = Integer.toString(i - 2730);
+            for (int j=0; j<temp[i]; j++){
+                if (s.length() == 2 && i-2730<0) {s = s.charAt(0)+"0"+s.charAt(1);}
+                if (s.length() == 1 && i-2730>=0) {s = "0"+s.charAt(0);}
+                writer.write(s.substring(0, s.length()-1)+"."+s.charAt(s.length()-1)+"\n");
+            }
+        }
+        writer.close();
     }
 
     /**
@@ -131,8 +202,40 @@ public class JavaTasks {
      * 2
      * 2
      */
-    static public void sortSequence(String inputName, String outputName) {
-        throw new NotImplementedError();
+    //T(N)=O(N)-трудоёмкость
+    //R(N)=O(N)-ресурсоёмкость
+    static public void sortSequence(String inputName, String outputName) throws IOException {
+        List<Integer> seq = new ArrayList<>();
+        Map<Integer, Integer> repeat = new TreeMap<>();
+        FileInputStream input = new FileInputStream(inputName);
+        Scanner reader = new Scanner(new InputStreamReader(input));
+        while ((reader.hasNextLine())) {
+            String line = reader.nextLine().trim();
+            if (!line.matches("[0-9]*")){
+                throw new IOException();
+            }
+            seq.add(Integer.parseInt(line));
+            repeat.putIfAbsent(Integer.parseInt(line), 0);
+            repeat.put(Integer.parseInt(line), repeat.get(Integer.parseInt(line))+1);
+        }
+        reader.close();
+        Integer minNumber = seq.get(0);
+        Integer countOfEntry = repeat.get(minNumber);
+        for (Integer key : repeat.keySet()){
+            if (countOfEntry<repeat.get(key)){
+                minNumber = key;
+                countOfEntry = repeat.get(key);
+            }
+        }
+        seq.removeAll(Collections.singleton(minNumber));
+        BufferedWriter writer = new BufferedWriter(new FileWriter(outputName));
+        for (Integer elem: seq){
+            writer.write(elem+"\n");
+        }
+        for (int i=0; i<countOfEntry; i++){
+            writer.write(minNumber+"\n");
+        }
+        writer.close();
     }
 
     /**
@@ -149,7 +252,10 @@ public class JavaTasks {
      *
      * Результат: second = [1 3 4 9 9 13 15 20 23 28]
      */
+    //T(N)=O(N*log N)-трудоёмкость
+    //R(N)=O(N)-ресурсоёмкость
     static <T extends Comparable<T>> void mergeArrays(T[] first, T[] second) {
-        throw new NotImplementedError();
+        System.arraycopy(first, 0, second, 0, first.length);
+       Arrays.sort(second);
     }
 }

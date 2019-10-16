@@ -1,6 +1,7 @@
 package lesson1;
 
 import kotlin.NotImplementedError;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.*;
 import java.util.*;
@@ -39,14 +40,67 @@ public class JavaTasks {
      */
     //T(N)=O(N*log N)-трудоёмкость
     //R(N)=O(N)-ресурсоёмкость
-    static public void sortTimes(String inputName, String outputName) throws IOException {
-        class Time {
-            private String number;
+    static public void sortTimes(String inputName, String outputName) throws Exception {
+        class Time implements Comparable<Time> {
+
+            private int hour;
+            private int min;
+            private int sec;
             private String dayPart;
 
-            Time(String number, String dayPart){
+            Time(int hour, int min, int sec, String dayPart) {
+                this.hour = hour;
+                this.min = min;
+                this.sec = sec;
                 this.dayPart = dayPart;
-                this.number = number;
+            }
+
+            public int getHour() {
+                return hour;
+            }
+
+            public int getMin() {
+                return min;
+            }
+
+            public int getSec() {
+                return sec;
+            }
+
+            public String getDayPart() {
+                return dayPart;
+            }
+
+            @Override
+            public int compareTo(@NotNull Time o) {
+                return Comparator.comparing(Time::getDayPart)
+                        .thenComparing(Time::getHour)
+                        .thenComparing(Time::getMin)
+                        .thenComparing(Time::getSec)
+                        .compare(this, o);
+            }
+
+            @Override
+            public String toString() {
+                StringBuilder res = new StringBuilder();
+                if (hour == 0) {
+                    res.append("12:");
+                } else {
+                    if (hour > 0 && hour < 10) {
+                        res.append("0");
+                    }
+                    res.append(hour).append(":");
+                }
+                if (min < 10) {
+                    res.append("0");
+                }
+                res.append(min).append(":");
+                if (sec < 10) {
+                    res.append("0");
+                }
+                res.append(sec).append(" ");
+                res.append(dayPart);
+                return res.toString();
             }
         }
         try(FileInputStream input = new FileInputStream(inputName);
@@ -59,26 +113,21 @@ public class JavaTasks {
                     if (line.substring(0,2).matches("[1][2]")){
                         line = "00" + line.substring(2);
                     }
-                    Time time = new Time(line.substring(0,8), line.substring(9));
+                    String[] parts = line.substring(0,8).split(":");
+                    int[] timeNumber = new int[3];
+                    for(int i = 0; i<parts.length; i++){
+                        timeNumber[i]=Integer.parseInt(parts[i]);
+                    }
+                    Time time = new Time(timeNumber[0],timeNumber[1],timeNumber[2], line.substring(9));
                     lines.add(time);
                 }
                 else {
                     throw new IOException();
                 }
             }
-            lines.sort((o1, o2) -> {
-                int timeCompare = o1.dayPart.compareTo(o2.dayPart);
-                if (timeCompare == 0) {
-                    return o1.number.compareTo(o2.number);
-                } else return timeCompare;
-            });
-            for(int i=0; i < lines.size(); i++){
-                if (lines.get(i).number.substring(0,2).matches("00")){
-                    lines.set(i, new Time("12"+lines.get(i).number.substring(2),lines.get(i).dayPart));
-                }
-            }
+            Collections.sort(lines);
             for (Time line : lines) {
-                writer.write(line.number + " " + line.dayPart + "\n");
+                writer.write(line.toString() + "\n");
             }
         }
     }
@@ -145,11 +194,9 @@ public class JavaTasks {
      */
     //T(N)=O(N)-трудоёмкость
     //R(N)=O(1)-ресурсоёмкость
-    static public void sortTemperatures(String inputName, String outputName) throws IOException {
-        Double leftBorder = -273.0;
-        Double rightBorder = 500.0;
-        leftBorder = leftBorder*10;
-        rightBorder = rightBorder*10;
+    static public void sortTemperatures(String inputName, String outputName) throws Exception {
+        Double leftBorder = -273.0*10;
+        Double rightBorder = 500.0*10;
         int tempNumber = rightBorder.intValue() - leftBorder.intValue() + 1;
         try (FileInputStream input = new FileInputStream(inputName);
              Scanner reader = new Scanner(new InputStreamReader(input));
@@ -157,13 +204,6 @@ public class JavaTasks {
             int[] temp = new int[tempNumber];
             while ((reader.hasNextLine())) {
                 String line = reader.nextLine().trim();
-                if (!line.matches("[-][0-9]*[.][0-9]|[0-9]*[.][0-9]")) {
-                    throw new IOException();
-                }
-                if (leftBorder > Integer.parseInt(line.replaceAll("[.]", "")) &&
-                        rightBorder < Integer.parseInt(line.replaceAll("[.]", ""))) {
-                    throw new IOException();
-                }
                 line = line.replaceAll("[.]", "");
                 temp[Integer.parseInt(line) - leftBorder.intValue()]++;
             }
@@ -213,7 +253,7 @@ public class JavaTasks {
      */
     //T(N)=O(N)-трудоёмкость
     //R(N)=O(N)-ресурсоёмкость
-    static public void sortSequence(String inputName, String outputName) throws IOException {
+    static public void sortSequence(String inputName, String outputName) throws Exception {
         List<Integer> seq = new ArrayList<>();
         Map<Integer, Integer> repeat = new TreeMap<>();
         try (FileInputStream input = new FileInputStream(inputName);
@@ -221,9 +261,6 @@ public class JavaTasks {
              BufferedWriter writer = new BufferedWriter(new FileWriter(outputName))) {
             while ((reader.hasNextLine())) {
                 String line = reader.nextLine().trim();
-                if (!line.matches("[0-9]*")) {
-                    throw new IOException();
-                }
                 seq.add(Integer.parseInt(line));
                 repeat.putIfAbsent(Integer.parseInt(line), 0);
                 repeat.put(Integer.parseInt(line), repeat.get(Integer.parseInt(line)) + 1);

@@ -3,7 +3,10 @@ package lesson2;
 import kotlin.NotImplementedError;
 import kotlin.Pair;
 
-import java.util.Set;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.*;
 
 @SuppressWarnings("unused")
 public class JavaAlgorithms {
@@ -84,8 +87,14 @@ public class JavaAlgorithms {
      * Общий комментарий: решение из Википедии для этой задачи принимается,
      * но приветствуется попытка решить её самостоятельно.
      */
+    //T(N)=O(N)-трудоёмкость
+    //R(N)=O(1)-ресурсоёмкость
     static public int josephTask(int menNumber, int choiceInterval) {
-        throw new NotImplementedError();
+             int result=0;
+             for(int i=1; i<=menNumber; i++){
+                 result=(result+choiceInterval)%i;
+             }
+             return result+1;
     }
 
     /**
@@ -99,8 +108,32 @@ public class JavaAlgorithms {
      * Если имеется несколько самых длинных общих подстрок одной длины,
      * вернуть ту из них, которая встречается раньше в строке first.
      */
-    static public String longestCommonSubstring(String firs, String second) {
-        throw new NotImplementedError();
+    //T(N)=O(N*M)-трудоёмкость, N=first.length, M=second.length
+    //R(N)=O(N*M)-ресурсоёмкость
+    static public String longestCommonSubstring(String first, String second) {
+        if (first.isEmpty() || second.isEmpty()) return "";
+        int[][] matrix = new int[first.length()][second.length()];
+        int maxSubstring = 0;
+        int maxIndex = -1;
+        for (int i=0; i<first.length(); i++){
+            for(int j=0; j<second.length(); j++){
+                matrix[i][j]=0;
+            }
+        }
+        for (int i=0; i<first.length(); i++){
+            for(int j=0; j<second.length(); j++){
+                if (first.charAt(i)==second.charAt(j)){
+                    if (i!=0 && j!=0) {matrix[i][j]=matrix[i-1][j-1]+1;}
+                    else {matrix[i][j]=1;}
+                    if(maxSubstring<matrix[i][j]){
+                        maxSubstring=matrix[i][j];
+                        maxIndex = i;
+                    }
+                }
+            }
+        }
+        if (maxSubstring==0) return "";
+        else{return first.substring(maxIndex-maxSubstring+1, maxIndex+1);}
     }
 
     /**
@@ -113,8 +146,24 @@ public class JavaAlgorithms {
      * Справка: простым считается число, которое делится нацело только на 1 и на себя.
      * Единица простым числом не считается.
      */
+    //T(N)=O(N*log log N)-трудоёмкость, т.к. используем квадратный корень
+    //R(N)=O(1)-ресурсоёмкость
     static public int calcPrimesNumber(int limit) {
-        throw new NotImplementedError();
+        int result = 0;
+        for (int i=1; i<=limit; i++){
+            if (isPrime(i)) result++;
+        }
+        return result;
+    }
+
+    static public boolean isPrime(int n){
+        if (n<2) return false;
+        if (n==2) return true;
+        if (n%2==0)return false;
+        for (int m=3; m<=new Double(Math.sqrt(n)).intValue(); m=m+2){
+            if(n%m==0) return false;
+        }
+        return true;
     }
 
     /**
@@ -143,7 +192,51 @@ public class JavaAlgorithms {
      * В файле буквы разделены пробелами, строки -- переносами строк.
      * Остальные символы ни в файле, ни в словах не допускаются.
      */
-    static public Set<String> baldaSearcher(String inputName, Set<String> words) {
-        throw new NotImplementedError();
+    //T(N)=O(N*M*H)-трудоёмкость, N-число строк, M-длина строки, H-количество слов
+    //R(N)=O(N*M+H)-ресурсоёмкость
+    static public Set<String> baldaSearcher(String inputName, Set<String> words) throws IOException {
+        try(FileInputStream input = new FileInputStream(inputName);
+        Scanner reader = new Scanner(new InputStreamReader(input))) {
+            List<String[]> matrix = new ArrayList<>();
+            Set<String> result = new HashSet<>();
+            Set<Pair<Integer, Integer>> passedWay = new HashSet<>();
+            while ((reader.hasNextLine())) {
+                String line = reader.nextLine().trim();
+                String[] part = line.split(" ");
+                matrix.add(part);
+            }
+            for (String word : words) {
+                for (int i = 0; i < matrix.size(); i++) {
+                    for (int j = 0; j < matrix.get(i).length; j++) {
+                        if (matrix.get(i)[j].equals(String.valueOf(word.charAt(0)))) {
+                            passedWay.clear();
+                            passedWay.add(new Pair<>(i,j));
+                            if (findWord(matrix, i, j, word, passedWay)) {
+                                result.add(word);
+                            }
+                        }
+                    }
+                }
+            }
+            return result;
+        }
+    }
+
+    static public boolean findWord(List<String[]> matrix, int i, int j, String word, Set<Pair<Integer,Integer>> way){
+        if(word.length()==1) return true;
+        String c = String.valueOf(word.charAt(1));
+        if(i>0 && !way.contains(new Pair<>(i-1, j)) && matrix.get(i-1)[j].equals(c)){
+            if(findWord(matrix, i-1, j, word.substring(1), way)) return true;
+        }
+        if(i<matrix.size()-1 && !way.contains(new Pair<>(i+1, j)) && matrix.get(i+1)[j].equals(c)){
+            if(findWord(matrix, i+1, j, word.substring(1), way)) return true;
+        }
+        if(j>0 && !way.contains(new Pair<>(i, j-1)) && matrix.get(i)[j-1].equals(c)){
+            if(findWord(matrix, i, j-1, word.substring(1), way)) return true;
+        }
+        if(j<matrix.get(i).length-1 && !way.contains(new Pair<>(i, j+1)) && matrix.get(i)[j+1].equals(c)){
+            if(findWord(matrix, i, j+1, word.substring(1), way)) return true;
+        }
+        return false;
     }
 }

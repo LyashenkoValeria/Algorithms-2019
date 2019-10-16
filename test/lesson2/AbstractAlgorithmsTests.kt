@@ -66,6 +66,8 @@ abstract class AbstractAlgorithmsTests {
         assertEquals(50000000, josephTask(50000000, 1))
         assertEquals(3, josephTask(8, 5))
         assertEquals(28, josephTask(40, 3))
+        assertEquals(5, josephTask(10, 2))
+        assertEquals(1, josephTask(1, 100000))
         var menNumber = 2
         for (i in 1..20) {
             assertEquals(1, josephTask(menNumber, 2))
@@ -120,6 +122,59 @@ abstract class AbstractAlgorithmsTests {
                 File("input/ruslan_ludmila_2.txt").readText()
             ).trim()
         )
+        assertEquals("", longestCommonSubstring("", ""))
+        assertEquals(
+            """
+Мой дядя самых честных правил,
+Когда не в шутку занемог,
+Он уважать себя заставил
+И лучше выдумать не мог.
+Его пример другим наука;
+Но, боже мой, какая скука
+С больным сидеть и день и ночь,
+Не отходя ни шагу прочь!
+Какое низкое коварство
+Полуживого забавлять,
+Ему подушки поправлять,
+Печально подносить лекарство,
+Вздыхать и думать про себя:
+Когда же черт возьмет тебя!
+                """.trimIndent(), longestCommonSubstring(
+                """
+Мой дядя самых честных правил,
+Когда не в шутку занемог,
+Он уважать себя заставил
+И лучше выдумать не мог.
+Его пример другим наука;
+Но, боже мой, какая скука
+С больным сидеть и день и ночь,
+Не отходя ни шагу прочь!
+Какое низкое коварство
+Полуживого забавлять,
+Ему подушки поправлять,
+Печально подносить лекарство,
+Вздыхать и думать про себя:
+Когда же черт возьмет тебя!
+                """.trimIndent(),
+                """
+Мой дядя самых честных правил,
+Когда не в шутку занемог,
+Он уважать себя заставил
+И лучше выдумать не мог.
+Его пример другим наука;
+Но, боже мой, какая скука
+С больным сидеть и день и ночь,
+Не отходя ни шагу прочь!
+Какое низкое коварство
+Полуживого забавлять,
+Ему подушки поправлять,
+Печально подносить лекарство,
+Вздыхать и думать про себя:
+Когда же черт возьмет тебя!
+                """.trimIndent()
+            )
+        )
+        assertEquals("ром", longestCommonSubstring("И грянул гром", "Гром"))
     }
 
     fun calcPrimesNumber(calcPrimesNumber: (Int) -> Int) {
@@ -144,6 +199,10 @@ abstract class AbstractAlgorithmsTests {
         assertEquals(148933, calcPrimesNumber(2000000))
         assertEquals(348513, calcPrimesNumber(5000000))
         assertEquals(664579, calcPrimesNumber(10000000))
+        assertEquals(5, calcPrimesNumber(12))
+        assertEquals(25, calcPrimesNumber(100))
+        assertEquals(500, calcPrimesNumber(3573))
+
     }
 
     fun baldaSearcher(baldaSearcher: (String, Set<String>) -> Set<String>) {
@@ -168,6 +227,17 @@ abstract class AbstractAlgorithmsTests {
                     "ПРОСТРАНСТВО", "ДИАЛЕКТИКА", "КВАЛИФИКАЦИЯ", "ПОМЕХОУСТОЙЧИВОСТЬ", "КОГЕРЕНТНОСТЬ",
                     "АППРОКСИМАЦИЯ", "ИНТЕРПОЛЯЦИЯ", "МАЙЕВТИКА", "ШРЕДИНГЕР", "ЭЙНШТЕЙН"
                 )
+            )
+        )
+        assertEquals(
+            setOf("АКВА"),
+            baldaSearcher("input/balda_in1.txt", setOf("АКВА"))
+        )
+        assertEquals(
+            setOf("ГРОМ", "РОМ", "МОР", "МОРГ", "РИК", "ОР", "КИРК"),
+            baldaSearcher(
+                "input/balda_in4.txt",
+                setOf("ГРОМ", "РОМ", "МОР", "МОРГ", "РИК", "ОР", "КИРК", "КОРМ", "РОГ", "МОКРО")
             )
         )
     }

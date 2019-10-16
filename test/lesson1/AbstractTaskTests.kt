@@ -63,12 +63,12 @@ abstract class AbstractTaskTests : AbstractFileTests() {
             File("temp.txt").delete()
         }
         try {
-            assertThrows<IOException> { sortTimes("input/time_in5.txt", "temp.txt") }
+            assertThrows<Exception> { sortTimes("input/time_in5.txt", "temp.txt") }
         } finally {
             File("temp.txt").delete()
         }
         try {
-            assertThrows<IOException> { sortTimes("input/time_in6.txt", "temp.txt") }
+            assertThrows<Exception> { sortTimes("input/time_in6.txt", "temp.txt") }
         } finally {
             File("temp.txt").delete()
         }
@@ -166,7 +166,13 @@ abstract class AbstractTaskTests : AbstractFileTests() {
         }
 
         try {
-            assertThrows<IOException> { sortTemperatures("input/time_in4.txt", "temp.txt") }
+            assertThrows<Exception> { sortTemperatures("input/time_in4.txt", "temp.txt") }
+        } finally {
+            File("temp.txt").delete()
+        }
+
+        try {
+            assertThrows<Exception> { sortTemperatures("input/time_in5.txt", "temp.txt") }
         } finally {
             File("temp.txt").delete()
         }

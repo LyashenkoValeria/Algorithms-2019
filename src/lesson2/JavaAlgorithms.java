@@ -146,7 +146,7 @@ public class JavaAlgorithms {
      * Справка: простым считается число, которое делится нацело только на 1 и на себя.
      * Единица простым числом не считается.
      */
-    //T(N)=O(N*log log N)-трудоёмкость, т.к. используем квадратный корень
+    //T(N)=O(N*sqrt(N))-трудоёмкость
     //R(N)=O(1)-ресурсоёмкость
     static public int calcPrimesNumber(int limit) {
         int result = 0;
@@ -193,7 +193,11 @@ public class JavaAlgorithms {
      * Остальные символы ни в файле, ни в словах не допускаются.
      */
     //T(N)=O(N*M*H)-трудоёмкость, N-число строк, M-длина строки, H-количество слов
-    //R(N)=O(N*M+H)-ресурсоёмкость
+    //R(N)=O(N*M+H)-ресурсоёмкость, т.к. в худшем случае result=H
+    /*
+    Если словом считается любая последовательность букв, то в худшем случае в result будут слова длиной от 1 до N*M,
+    представляющие собой всевозможные комбинации букв, которые можно построить в матрице
+    */
     static public Set<String> baldaSearcher(String inputName, Set<String> words) throws IOException {
         try(FileInputStream input = new FileInputStream(inputName);
         Scanner reader = new Scanner(new InputStreamReader(input))) {

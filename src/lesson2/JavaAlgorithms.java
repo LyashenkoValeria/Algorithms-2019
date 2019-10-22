@@ -196,7 +196,7 @@ public class JavaAlgorithms {
     //R(N)=O(N*M+H)-ресурсоёмкость, т.к. в худшем случае result=H
     /*
     Если словом считается любая последовательность букв, то в худшем случае в result будут слова длиной от 1 до N*M,
-    представляющие собой всевозможные комбинации букв, которые можно построить в матрице
+    представляющие собой всевозможные комбинации букв, которые можно построить в матрице по правилам игры
     */
     static public Set<String> baldaSearcher(String inputName, Set<String> words) throws IOException {
         try(FileInputStream input = new FileInputStream(inputName);

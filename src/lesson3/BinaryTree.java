@@ -9,6 +9,7 @@ import java.util.*;
 // Attention: comparable supported but comparator is not
 public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implements CheckableSortedSet<T> {
 
+
     private static class Node<T> {
         final T value;
 
@@ -23,29 +24,29 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
 
     private Node<T> root = null;
 
+
+
     private int size = 0;
 
     @Override
-    public boolean add(T t) {
-        Node<T> closest = find(t);
-        int comparison = closest == null ? -1 : t.compareTo(closest.value);
-        if (comparison == 0) {
-            return false;
-        }
-        Node<T> newNode = new Node<>(t);
-        if (closest == null) {
-            root = newNode;
-        }
-        else if (comparison < 0) {
-            assert closest.left == null;
-            closest.left = newNode;
-        }
-        else {
-            assert closest.right == null;
-            closest.right = newNode;
-        }
-        size++;
-        return true;
+    public boolean add(T t)  {
+            Node<T> closest = find(t);
+            int comparison = closest == null ? -1 : t.compareTo(closest.value);
+            if (comparison == 0) {
+              return false;
+            }
+            Node<T> newNode = new Node<>(t);
+            if (closest == null) {
+                root = newNode;
+            } else if (comparison < 0) {
+                assert closest.left == null;
+                closest.left = newNode;
+            } else {
+                assert closest.right == null;
+                closest.right = newNode;
+            }
+            size++;
+            return true;
     }
 
     public boolean checkInvariant() {
@@ -72,11 +73,88 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
      * Удаление элемента в дереве
      * Средняя
      */
+    //T(N)=O(N)-трудоёмкость
+    //R(N)=O(1)-ресурсоёмкость
     @Override
     public boolean remove(Object o) {
-        // TODO
-        throw new NotImplementedError();
+        if (!contains(o)) return false;
+        T t = (T) o;
+        Node<T> parent = root;
+        Node<T> delete = root;
+        while (delete.value != t) {
+            parent = delete;
+            if (t.compareTo(delete.value) < 0) {
+                delete = delete.left;
+            } else {
+                delete = delete.right;
+            }
+        }
+
+        //Случай первый. У удаляемого нет потомков
+        if (delete.left == null && delete.right == null){
+            if(delete == root){
+                root = null;
+            }
+            else if (parent.left == delete) {
+                parent.left = null;
+            } else {
+                parent.right = null;
+            }
+        }
+
+        //Случай второй. У удаляемого 1 потомок
+        else if(delete.left == null || delete.right == null) {
+            if (delete.left == null) {
+                if (delete == root) {
+                    root = delete.right;
+                } else if (parent.left == delete) {
+                    parent.left = delete.right;
+                } else {
+                    parent.right = delete.right;
+                }
+            } else  {
+                if (delete == root) {
+                    root = delete.left;
+                } else if (parent.left == delete) {
+                    parent.left = delete.left;
+                } else {
+                    parent.right = delete.left;
+                }
+            }
+        }
+
+        //Случай третий. У удаляемого 2 потомка
+        else {
+            Node<T> next = delete.right;
+            Node<T> nextParent = delete;
+
+            //Находим следующий за удалемым элемент
+            while (next.left != null) {
+                nextParent = next;
+                next = next.left;
+            }
+
+            //Перевешиваем на него потомков delete
+            if (next != delete.right) {
+                nextParent.left = next.right;
+                next.right = delete.right;
+            }
+            next.left = delete.left;
+
+            if (delete == root) {
+                root = next;
+            } else if (parent.left == delete) {
+                parent.left = next;
+            } else {
+                parent.right = next;
+            }
+        }
+
+        size--;
+        return true;
     }
+
+
 
     @Override
     public boolean contains(Object o) {
@@ -108,18 +186,28 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
 
     public class BinaryTreeIterator implements Iterator<T> {
 
+        private Stack<Node<T>> stack = new Stack<>();
+        private Node<T> current = null;
+
+        //T(N)=O(N)-трудоёмкость
+        //R(N)=O(1)-ресурсоёмкость
         private BinaryTreeIterator() {
-            // Добавьте сюда инициализацию, если она необходима
+        Node<T> node = root;
+        while (node != null){
+            stack.push(node);
+            node = node.left;
+        }
         }
 
         /**
          * Проверка наличия следующего элемента
          * Средняя
          */
+        //T(N)=O(1)-трудоёмкость
+        //R(N)=O(1)-ресурсоёмкость
         @Override
         public boolean hasNext() {
-            // TODO
-            throw new NotImplementedError();
+            return !stack.isEmpty();
         }
 
         /**
@@ -128,9 +216,26 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
          */
         @Override
         public T next() {
-            // TODO
-            throw new NotImplementedError();
+            current = nextNode();
+            if (current == null) throw new NoSuchElementException();
+            return current.value;
         }
+
+        //T(N)=O(N)-трудоёмкость
+        //R(N)=O(1)-ресурсоёмкость
+        public Node<T> nextNode(){
+            Node<T> node = stack.pop();
+            current = node;
+            if (node.right != null){
+                node = node.right;
+                while (node != null){
+                    stack.push(node);
+                    node = node.left;
+                }
+            }
+            return current;
+        }
+
 
         /**
          * Удаление следующего элемента
@@ -165,34 +270,63 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
      * Для этой задачи нет тестов (есть только заготовка subSetTest), но её тоже можно решить и их написать
      * Очень сложная
      */
+    //T(N)=O(N)-трудоёмкость
+    //R(N)=O(N)-ресурсоёмкость
     @NotNull
     @Override
     public SortedSet<T> subSet(T fromElement, T toElement) {
-        // TODO
-        throw new NotImplementedError();
+        SortedSet<T> res = new TreeSet<>();
+        BinaryTreeIterator i = new BinaryTreeIterator();
+        while (i.hasNext()){
+            T data = i.next();
+            if (data.compareTo(fromElement) >= 0 && data.compareTo(toElement) < 0){
+                res.add(data);
+            }
+        }
+        return res;
     }
 
     /**
      * Найти множество всех элементов меньше заданного
      * Сложная
      */
+    //T(N)=O(N)-трудоёмкость
+    //R(N)=O(N)-ресурсоёмкость
     @NotNull
     @Override
     public SortedSet<T> headSet(T toElement) {
-        // TODO
-        throw new NotImplementedError();
+        SortedSet<T> res = new TreeSet<>();
+        BinaryTreeIterator i = new BinaryTreeIterator();
+        while (i.hasNext()){
+            T data = i.next();
+            if (data.compareTo(toElement) < 0){
+                res.add(data);
+            }
+        }
+        return res;
     }
 
     /**
      * Найти множество всех элементов больше или равных заданного
      * Сложная
      */
+    //T(N)=O(N)-трудоёмкость
+    //R(N)=O(N)-ресурсоёмкость
     @NotNull
     @Override
     public SortedSet<T> tailSet(T fromElement) {
-        // TODO
-        throw new NotImplementedError();
+        SortedSet<T> res = new TreeSet<>();
+        BinaryTreeIterator i = new BinaryTreeIterator();
+        while (i.hasNext()){
+            T data = i.next();
+            if (data.compareTo(fromElement) >= 0){
+                res.add(data);
+            }
+        }
+        return res;
     }
+
+
 
     @Override
     public T first() {

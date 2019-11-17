@@ -81,83 +81,67 @@ abstract class AbstractHeadTailTest {
     }
 
     protected fun doHeadSetRelationTest() {
-        var set: SortedSet<Int> = tree.headSet(7)
-        val e = IllegalArgumentException()
+        val set: SortedSet<Int> = tree.headSet(7)
         assertEquals(6, set.size)
         assertEquals(10, tree.size)
         tree.add(0)
-        set = tree.headSet(7)
         assertTrue(set.contains(0))
         set.add(-2)
-        tree.add(-2)
         assertTrue(tree.contains(-2))
         tree.add(12)
         assertFalse(set.contains(12))
-        assertFailsWith<IllegalArgumentException> { if (!tree.add(8)) throw e }
+        assertFailsWith<IllegalArgumentException> { set.add(8) }
         assertEquals(8, set.size)
         assertEquals(13, tree.size)
-        tree.remove(0)
-        set = tree.headSet(7)
-        assertFalse(set.contains(0))
-        assertEquals(7, set.size)
-        assertEquals(12, tree.size)
 
-        set = tree.headSet(100)
-        for (i in 1..10)
-            assertEquals(true, set.contains(i))
-        assertEquals(true, set.contains(-2))
-        assertEquals(true, set.contains(12))
-        assertEquals(12, set.size)
 
-        set = tree.headSet(-100)
-        for (i in 1..10)
-            assertEquals(false, set.contains(i))
-        assertEquals(false, set.contains(-2))
-        assertEquals(false, set.contains(12))
-        assertEquals(0, set.size)
+        var set1: SortedSet<Int> = tree.headSet(100)
+        for (i in 0..10)
+            assertEquals(true, set1.contains(i))
+        assertEquals(true, set1.contains(-2))
+        assertEquals(true, set1.contains(12))
+        set1.add(50)
+        assertEquals(true, set1.contains(50))
+        assertEquals(14, set1.size)
+
+        set1 = tree.headSet(-100)
+        for (i in 0..10)
+            assertEquals(false, set1.contains(i))
+        assertEquals(false, set1.contains(-2))
+        assertEquals(false, set1.contains(12))
+        assertEquals(0, set1.size)
     }
 
     protected fun doTailSetRelationTest() {
-        var set: SortedSet<Int> = tree.tailSet(4)
-        val e = IllegalArgumentException()
+        val set: SortedSet<Int> = tree.tailSet(4)
         assertEquals(7, set.size)
         assertEquals(10, tree.size)
         tree.add(12)
-        set = tree.tailSet(4)
         assertTrue(set.contains(12))
         set.add(42)
-        tree.add(42)
-        assertTrue(set.contains(42))
+        assertTrue(tree.contains(42))
         tree.add(0)
-        set = tree.tailSet(4)
         assertFalse(set.contains(0))
-        tree.add(-2)
-        assertFailsWith<IllegalArgumentException> { if (!tree.add(-2)) throw e }
-        tree.remove(-2)
+        assertFailsWith<IllegalArgumentException> { set.add(-2) }
         assertEquals(9, set.size)
         assertEquals(13, tree.size)
-        tree.remove(42)
-        set = tree.tailSet(4)
-        assertFalse(set.contains(42))
-        assertEquals(8, set.size)
-        assertEquals(12, tree.size)
 
-        set = tree.tailSet(-100)
+        var set1: SortedSet<Int> = tree.tailSet(-100)
         for (i in 0..10)
-            assertEquals(true, set.contains(i))
-        assertEquals(true, set.contains(12))
-        assertEquals(12, set.size)
+            assertEquals(true, set1.contains(i))
+        assertEquals(true, set1.contains(12))
+        assertEquals(true, set1.contains(42))
+        assertEquals(13, set1.size)
 
-        set = tree.tailSet(100)
+        set1 = tree.tailSet(100)
         for (i in 0..10)
-            assertEquals(false, set.contains(i))
-        assertEquals(false, set.contains(12))
-        assertEquals(0, set.size)
+            assertEquals(false, set1.contains(i))
+        assertEquals(false, set1.contains(12))
+        assertEquals(0, set1.size)
     }
 
     protected fun doSubSetTest() {
-        var smallSet: SortedSet<Int> = tree.subSet(3, 8)
-        val e = IllegalArgumentException()
+        val smallSet: SortedSet<Int> = tree.subSet(3, 8)
         assertEquals(false, smallSet.contains(1))
         assertEquals(false, smallSet.contains(2))
         assertEquals(true, smallSet.contains(3))
@@ -169,8 +153,8 @@ abstract class AbstractHeadTailTest {
         assertEquals(false, smallSet.contains(9))
         assertEquals(false, smallSet.contains(10))
 
-        assertFailsWith<IllegalArgumentException> { if (!tree.add(2)) throw e }
-        assertFailsWith<IllegalArgumentException> { if (!tree.add(9)) throw e }
+        assertFailsWith<IllegalArgumentException> { smallSet.add(2) }
+        assertFailsWith<IllegalArgumentException> { smallSet.add(9) }
 
         val allSet = tree.subSet(-128, 128)
         for (i in 1..10)
@@ -185,53 +169,47 @@ abstract class AbstractHeadTailTest {
             assertEquals(element in fromElement until toElement, randomSubset.contains(element))
         }
 
-        smallSet = tree.subSet(0, 0)
+        var smallSet1 = tree.subSet(0, 0)
         for (i in 1..10)
-            assertEquals(false, smallSet.contains(i))
-        smallSet = tree.subSet(1, 2)
-        assertEquals(true, smallSet.contains(1))
-        assertEquals(false, smallSet.contains(2))
+            assertEquals(false, smallSet1.contains(i))
+        smallSet1 = tree.subSet(1, 2)
+        assertEquals(true, smallSet1.contains(1))
+        assertEquals(false, smallSet1.contains(2))
     }
 
     protected fun doSubSetRelationTest() {
-        var set: SortedSet<Int> = tree.subSet(2, 15)
-        val e = IllegalArgumentException()
+        val set: SortedSet<Int> = tree.subSet(2, 15)
         assertEquals(9, set.size)
         assertEquals(10, tree.size)
         tree.add(11)
-        set = tree.subSet(2, 15)
         assertTrue(set.contains(11))
-        tree.add(14)
+        set.add(14)
         assertTrue(tree.contains(14))
         tree.add(0)
-        set = tree.subSet(2, 15)
         assertFalse(set.contains(0))
         tree.add(15)
-        set = tree.subSet(2, 15)
         assertFalse(set.contains(15))
-        assertFailsWith<IllegalArgumentException> { if (!tree.add(1)) throw e }
-        tree.add(20)
-        assertFailsWith<IllegalArgumentException> { if (!tree.add(20)) throw e }
-        tree.remove(20)
+        assertFailsWith<IllegalArgumentException> { set.add(1) }
+        assertFailsWith<IllegalArgumentException> { set.add(20) }
         assertEquals(11, set.size)
         assertEquals(14, tree.size)
 
         tree.remove(14)
         tree.remove(15)
-        set = tree.subSet(2, 15)
-        assertFalse(set.contains(14))
-        assertFalse(set.contains(15))
-        for (i in 12..10000){
+        var set1 = tree.subSet(2, 15)
+        assertFalse(set1.contains(14))
+        assertFalse(set1.contains(15))
+        for (i in 12..10000) {
             tree.add(i)
         }
 
-        set = tree.subSet(9000, 10000)
+        set1 = tree.subSet(9000, 10000)
         for (i in 0..8999) {
-            assertEquals(false, set.contains(i))
+            assertEquals(false, set1.contains(i))
         }
-        assertEquals(false, set.contains(10000))
+        assertEquals(false, set1.contains(10000))
         for (i in 9000..9999) {
-            assertEquals(true, set.contains(i))
+            assertEquals(true, set1.contains(i))
         }
     }
 

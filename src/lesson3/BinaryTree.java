@@ -77,11 +77,10 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
     //R(N)=O(1)-ресурсоёмкость
     @Override
     public boolean remove(Object o) {
-        if (!contains(o)) return false;
         T t = (T) o;
         Node<T> parent = root;
         Node<T> delete = root;
-        while (delete.value != t) {
+        while (delete != null && delete.value != t) {
             parent = delete;
             if (t.compareTo(delete.value) < 0) {
                 delete = delete.left;
@@ -89,41 +88,15 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
                 delete = delete.right;
             }
         }
+        if (delete == null) return false;
 
-        //Случай первый. У удаляемого нет потомков
-        if (delete.left == null && delete.right == null){
-            if(delete == root){
-                root = null;
-            }
-            else if (parent.left == delete) {
-                parent.left = null;
-            } else {
-                parent.right = null;
-            }
-        }
-
-        //Случай второй. У удаляемого 1 потомок
+        //У удаляемого 0 или 1 потомок
         else if(delete.left == null || delete.right == null) {
-            if (delete.left == null) {
-                if (delete == root) {
-                    root = delete.right;
-                } else if (parent.left == delete) {
-                    parent.left = delete.right;
-                } else {
-                    parent.right = delete.right;
-                }
-            } else  {
-                if (delete == root) {
-                    root = delete.left;
-                } else if (parent.left == delete) {
-                    parent.left = delete.left;
-                } else {
-                    parent.right = delete.left;
-                }
-            }
+            if (delete.left == null) changeNode(delete, parent, delete.right);
+            else  changeNode(delete, parent, delete.left);
         }
 
-        //Случай третий. У удаляемого 2 потомка
+        //У удаляемого 2 потомка
         else {
             Node<T> next = delete.right;
             Node<T> nextParent = delete;
@@ -140,18 +113,21 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
                 next.right = delete.right;
             }
             next.left = delete.left;
-
-            if (delete == root) {
-                root = next;
-            } else if (parent.left == delete) {
-                parent.left = next;
-            } else {
-                parent.right = next;
-            }
+            changeNode(delete, parent, next);
         }
 
         size--;
         return true;
+    }
+
+    public void changeNode(Node<T> del, Node<T> parent, Node<T> newChild){
+            if (del == root) {
+                root = newChild;
+            } else if (parent.left == del) {
+                parent.left = newChild;
+            } else {
+                parent.right = newChild;
+            }
     }
 
 
@@ -270,63 +246,37 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
      * Для этой задачи нет тестов (есть только заготовка subSetTest), но её тоже можно решить и их написать
      * Очень сложная
      */
-    //T(N)=O(N)-трудоёмкость
-    //R(N)=O(N)-ресурсоёмкость
+    //T(N)=O(1)-трудоёмкость
+    //R(N)=O(1)-ресурсоёмкость
     @NotNull
     @Override
     public SortedSet<T> subSet(T fromElement, T toElement) {
-        SortedSet<T> res = new TreeSet<>();
-        BinaryTreeIterator i = new BinaryTreeIterator();
-        while (i.hasNext()){
-            T data = i.next();
-            if (data.compareTo(fromElement) >= 0 && data.compareTo(toElement) < 0){
-                res.add(data);
-            }
-        }
-        return res;
+        return new SubTree<>(this, fromElement, toElement);
     }
 
     /**
      * Найти множество всех элементов меньше заданного
      * Сложная
      */
-    //T(N)=O(N)-трудоёмкость
-    //R(N)=O(N)-ресурсоёмкость
+    //T(N)=O(1)-трудоёмкость
+    //R(N)=O(1)-ресурсоёмкость
     @NotNull
     @Override
     public SortedSet<T> headSet(T toElement) {
-        SortedSet<T> res = new TreeSet<>();
-        BinaryTreeIterator i = new BinaryTreeIterator();
-        while (i.hasNext()){
-            T data = i.next();
-            if (data.compareTo(toElement) < 0){
-                res.add(data);
-            }
-        }
-        return res;
+        return new SubTree<>(this, null, toElement);
     }
 
     /**
      * Найти множество всех элементов больше или равных заданного
      * Сложная
      */
-    //T(N)=O(N)-трудоёмкость
-    //R(N)=O(N)-ресурсоёмкость
+    //T(N)=O(1)-трудоёмкость
+    //R(N)=O(1)-ресурсоёмкость
     @NotNull
     @Override
     public SortedSet<T> tailSet(T fromElement) {
-        SortedSet<T> res = new TreeSet<>();
-        BinaryTreeIterator i = new BinaryTreeIterator();
-        while (i.hasNext()){
-            T data = i.next();
-            if (data.compareTo(fromElement) >= 0){
-                res.add(data);
-            }
-        }
-        return res;
+        return new SubTree<>(this, fromElement, null);
     }
-
-
 
     @Override
     public T first() {
@@ -346,5 +296,64 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
             current = current.right;
         }
         return current.value;
+    }
+
+
+    public class SubTree<ST extends Comparable<ST>> extends BinaryTree<ST>{
+        BinaryTree<ST> tree;
+        ST fromElem, toElem;
+
+        public SubTree(BinaryTree<ST> tree, ST fromElem, ST toElem){
+            this.tree = tree;
+            this.fromElem = fromElem;
+            this.toElem = toElem;
+        }
+
+        //T(N)=O(1)-трудоёмкость
+        //R(N)=O(1)-ресурсоёмкость
+        private boolean inSubTree(ST elem){
+            if(fromElem != null && toElem != null){
+                return elem.compareTo(fromElem) >= 0 && elem.compareTo(toElem) < 0;
+            } else if (fromElem == null){
+                return elem.compareTo(toElem) < 0;
+            } else return elem.compareTo(fromElem) >= 0;
+        }
+
+        //T(N)=O(N)-трудоёмкость
+        //R(N)=O(1)-ресурсоёмкость
+        @Override
+        public boolean add(ST t) {
+            if (inSubTree(t)) {
+                return tree.add(t);
+            }
+            throw new IllegalArgumentException();
+        }
+
+        @SuppressWarnings("unchecked")
+        @Override
+        public boolean contains(Object o) {
+            return (inSubTree((ST) o)) && tree.contains(o);
+        }
+
+        //T(N)=O(N)-трудоёмкость
+        //R(N)=O(1)-ресурсоёмкость
+        private int subTreeSize(Node<ST> node){
+            int size = 0;
+            if(node != null){
+                if(inSubTree(node.value)){
+                    size++;
+                }
+                size += subTreeSize(node.left);
+                size += subTreeSize(node.right);
+            }
+            return size;
+        }
+
+
+        @Override
+        public int size(){
+            return subTreeSize(tree.root);
+        }
+
     }
 }

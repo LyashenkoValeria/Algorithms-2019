@@ -314,9 +314,11 @@ public class BinaryTree<T extends Comparable<T>> extends AbstractSet<T> implemen
         private boolean inSubTree(ST elem){
             if(fromElem != null && toElem != null){
                 return elem.compareTo(fromElem) >= 0 && elem.compareTo(toElem) < 0;
-            } else if (fromElem == null){
+            }
+            else if (fromElem == null){
                 return elem.compareTo(toElem) < 0;
-            } else return elem.compareTo(fromElem) >= 0;
+            }
+            else return elem.compareTo(fromElem) >= 0;
         }
 
         //T(N)=O(N)-трудоёмкость
